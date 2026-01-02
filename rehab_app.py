@@ -5,10 +5,14 @@ import av
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
-# --- 1. SETUP MEDIAPIPE ---
-mp_drawing = mp.solutions.drawing_utils
-mp_pose = mp.solutions.pose
-
+# --- 1. SETUP MEDIAPIPE (Fix for Cloud) ---
+import mediapipe as mp
+try:
+    from mediapipe.python.solutions import drawing_utils as mp_drawing
+    from mediapipe.python.solutions import pose as mp_pose
+except ImportError:
+    mp_drawing = mp.solutions.drawing_utils
+    mp_pose = mp.solutions.pose
 # --- 2. HELPER FUNCTION ---
 def calculate_angle(a, b, c):
     a = np.array(a)
@@ -79,4 +83,5 @@ st.title("Rehab Tracker Mobile")
 st.write("Ensure you allow camera access when prompted.")
 
 # Start the Webcam Stream
+
 webrtc_streamer(key="rehab", video_processor_factory=RehabProcessor)
