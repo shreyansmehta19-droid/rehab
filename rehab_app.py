@@ -5,15 +5,10 @@ import streamlit as st
 import mediapipe as mp
 from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
-# --- SAFETY IMPORT BLOCK ---
-# Try to load the tools. If the "shortcut" fails, we load them manually.
-try:
-    mp_drawing = mp.solutions.drawing_utils
-    mp_pose = mp.solutions.pose
-except AttributeError:
-    import importlib
-    mp_drawing = importlib.import_module("mediapipe.python.solutions.drawing_utils")
-    mp_pose = importlib.import_module("mediapipe.python.solutions.pose")
+# --- STANDARD SETUP ---
+# Since you are now on Python 3.11, this standard import should work.
+mp_drawing = mp.solutions.drawing_utils
+mp_pose = mp.solutions.pose
 
 # --- HELPER FUNCTION ---
 def calculate_angle(a, b, c):
