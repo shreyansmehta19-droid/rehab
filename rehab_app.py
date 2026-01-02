@@ -5,7 +5,7 @@ import av
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
-# --- 1. SETUP MEDIAPIPE (Fix for Cloud) ---
+# --- 1. SETUP MEDIAPIPE (Fixed) ---
 import mediapipe as mp
 try:
     from mediapipe.python.solutions import drawing_utils as mp_drawing
@@ -85,3 +85,4 @@ st.write("Ensure you allow camera access when prompted.")
 # Start the Webcam Stream
 
 webrtc_streamer(key="rehab", video_processor_factory=RehabProcessor)
+
