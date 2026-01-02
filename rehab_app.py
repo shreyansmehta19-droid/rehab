@@ -1,15 +1,18 @@
 import cv2
-import mediapipe as mp
 import numpy as np
 import av
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
-# --- 1. SETUP MEDIAPIPE (Fixed) ---
-import mediapipe as mp
-try:
-    from mediapipe.python.solutions import drawing_utils as mp_drawing
-    from mediapipe.python.solutions import pose as mp_pose
+# --- NUCLEAR FIX: DIRECT IMPORTS ONLY ---
+# We do not use "mp.solutions" at all. We go straight to the source files.
+import mediapipe.python.solutions.drawing_utils as mp_drawing
+import mediapipe.python.solutions.pose as mp_pose
+# ----------------------------------------
+
+# --- 2. HELPER FUNCTION ---
+def calculate_angle(a, b, c):
+    # ... (Keep the rest of your code exactly the same)
 except ImportError:
     mp_drawing = mp.solutions.drawing_utils
     mp_pose = mp.solutions.pose
@@ -85,4 +88,5 @@ st.write("Ensure you allow camera access when prompted.")
 # Start the Webcam Stream
 
 webrtc_streamer(key="rehab", video_processor_factory=RehabProcessor)
+
 
