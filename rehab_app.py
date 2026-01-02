@@ -5,10 +5,15 @@ import streamlit as st
 import mediapipe as mp
 from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
-# --- STANDARD SETUP ---
-# We are going back to the standard way, but we will fix the library version in Step 2.
-mp_drawing = mp.solutions.drawing_utils
-mp_pose = mp.solutions.pose
+# --- SAFETY IMPORT BLOCK ---
+# Try to load the tools. If the "shortcut" fails, we load them manually.
+try:
+    mp_drawing = mp.solutions.drawing_utils
+    mp_pose = mp.solutions.pose
+except AttributeError:
+    import importlib
+    mp_drawing = importlib.import_module("mediapipe.python.solutions.drawing_utils")
+    mp_pose = importlib.import_module("mediapipe.python.solutions.pose")
 
 # --- HELPER FUNCTION ---
 def calculate_angle(a, b, c):
@@ -21,7 +26,7 @@ def calculate_angle(a, b, c):
         angle = 360-angle
     return angle
 
-# --- VIDEO PROCESSOR CLASS ---
+# --- VIDEO PROCESSOR ---
 class RehabProcessor(VideoTransformerBase):
     def __init__(self):
         self.pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -32,22 +37,19 @@ class RehabProcessor(VideoTransformerBase):
     def recv(self, frame):
         image = frame.to_ndarray(format="bgr24")
         
-        # 1. Process Image
+        # 1. Process
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         results = self.pose.process(image_rgb)
         
-        # 2. Draw Landmarks & Logic
+        # 2. Logic
         if results.pose_landmarks:
             landmarks = results.pose_landmarks.landmark
-            
-            # Left Arm Coordinates
             shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
             elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
             wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
             
             angle = calculate_angle(shoulder, elbow, wrist)
             
-            # Curl Logic
             if angle > 160:
                 self.stage = "down"
                 self.feedback = "Good Extension"
@@ -58,15 +60,11 @@ class RehabProcessor(VideoTransformerBase):
 
             mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
             
-            # Draw Data
             cv2.rectangle(image, (0,0), (225,73), (245,117,16), -1)
-            cv2.putText(image, 'REPS', (15,12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
             cv2.putText(image, str(self.counter), (10,60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 2, cv2.LINE_AA)
             cv2.putText(image, self.feedback, (10, 440), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
         return av.VideoFrame.from_ndarray(image, format="bgr24")
 
-# --- APP LAYOUT ---
 st.title("Rehab Tracker Mobile")
-st.write("Ensure you allow camera access when prompted.")
 webrtc_streamer(key="rehab", video_processor_factory=RehabProcessor)
