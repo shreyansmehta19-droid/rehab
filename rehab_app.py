@@ -2,12 +2,13 @@ import cv2
 import av
 import numpy as np
 import streamlit as st
+import mediapipe as mp
 from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
-# --- NUCLEAR FIX: DIRECT IMPORTS ---
-# We look for the tools directly where they live, bypassing the broken shortcuts.
-import mediapipe.python.solutions.drawing_utils as mp_drawing
-import mediapipe.python.solutions.pose as mp_pose
+# --- STANDARD SETUP ---
+# We are going back to the standard way, but we will fix the library version in Step 2.
+mp_drawing = mp.solutions.drawing_utils
+mp_pose = mp.solutions.pose
 
 # --- HELPER FUNCTION ---
 def calculate_angle(a, b, c):
